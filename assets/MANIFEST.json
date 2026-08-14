@@ -1,0 +1,27 @@
+{
+  "_note": "The files in this folder are placeholders. Nothing in this repository decodes media. This manifest is where an asset's properties live, and it is what the channels and the provider stubs read.",
+  "assets": {
+    "hero-9x16": {
+      "file": "hero-9x16.mp4",
+      "kind": "video",
+      "format": "mp4",
+      "ratio": "9:16",
+      "durationSeconds": 22,
+      "bytes": 4718592
+    },
+    "cover-1x1": {
+      "file": "cover-1x1.jpg",
+      "kind": "image",
+      "format": "jpg",
+      "ratio": "1:1",
+      "bytes": 184320
+    },
+    "still-16x9": {
+      "file": "still-16x9.jpg",
+      "kind": "image",
+      "format": "jpg",
+      "ratio": "16:9",
+      "bytes": 262144
+    }
+  }
+}

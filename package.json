@@ -1,0 +1,14 @@
+{
+  "name": "ad-package-assembler",
+  "version": "1.4.0",
+  "private": true,
+  "type": "module",
+  "description": "Assembles advertising packages from a creative brief and submits them to a channel.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "run:meta": "node src/run.js --channel meta --brief briefs/launch-2026-08.json"
+  }
+}

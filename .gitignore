@@ -1,0 +1,7 @@
+# Stored without the leading dot so it does not apply to the repository this file is
+# authored in. The export renames it to .gitignore on the way out.
+node_modules/
+.env
+.env.*
+*.log
+.DS_Store
