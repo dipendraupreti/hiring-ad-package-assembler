@@ -6,8 +6,8 @@ It turns a creative brief and a set of supplied assets into an advertising
 package, and submits that package to one advertising channel. One run is one
 brief, one channel, one package. The providers are stubs: they return canned
 responses and report a simulated credit cost per call, and those credits are how
-a run's cost is measured. One channel exists today, `meta`. This note is about
-adding a second, `tiktok`.
+a run's cost is measured. One channel existed when I started, `meta`. This note
+is about adding a second, `tiktok`.
 
 ## What is already present
 
