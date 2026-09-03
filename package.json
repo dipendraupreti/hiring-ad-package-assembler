@@ -9,6 +9,8 @@
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "run:meta": "node src/run.js --channel meta --brief briefs/launch-2026-08.json"
+    "run:meta": "node src/run.js --channel meta --brief briefs/launch-2026-08.json",
+    "verify": "node scripts/verify.mjs",
+    "run:tiktok": "node src/run.js --channel tiktok --brief briefs/launch-2026-08.json"
   }
 }

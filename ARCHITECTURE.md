@@ -25,8 +25,8 @@ flowchart LR
     AJ --> ASM
 
     subgraph CH["channels/"]
-        M["meta<br/>exists"]
-        T["tiktok<br/>missing"]
+        M["meta<br/>was here"]
+        T["tiktok<br/>added"]
         N["next platform"]
     end
 
@@ -55,7 +55,7 @@ A channel is four things plus one optional thing, registered in
 | `buildPayload` | The object this channel's provider expects |
 | `prepare` (optional) | Provider calls the pipeline does not make on its own |
 
-`src/channels/meta.js` is the one existing implementation, and it is the
+`src/channels/meta.js` was the one existing implementation, and it is the
 reference for what a correct one looks like. Adding a platform means one new
 module beside it and one line in the registry — `assemble.js`, `brief.js`,
 `assets.js` and the existing channel are not touched. Each provider stub
@@ -63,8 +63,8 @@ enforces its own payload shape and limits independently (`PROVIDERS.md`), so
 platform quirks — flat vs. nested, field names, length limits, which assets —
 belong in the channel module, and the brief and asset manifest stay neutral.
 
-The second channel is `tiktok`. Its provider stub ships complete; what is
-missing is the channel module, its one line in `src/channels/index.js`, and a
+The second channel is `tiktok`. Its provider stub already shipped; what was
+missing was the channel module, its one line in `src/channels/index.js`, and a
 `run:tiktok` script in `package.json`. It is a good test of the contract because
 it needs things `meta` does not: two assets instead of one, and a `prepare` step.
 
@@ -135,8 +135,8 @@ the same `uploads` object, so the channel can attach it there — no change to
 `test/meta.channel.test.js` pin this contract and have to pass untouched.
 
 Expected cost for one tiktok package: two uploads at 15, one transcode at 8, one
-create at 3 — **41 credits**, against meta's 15. To be confirmed against what the
-stub actually reports.
+create at 3 — **41 credits**, against meta's 15. *(Confirmed: the stub reports
+exactly this. See below.)*
 
 ## Failure modes I expect
 
@@ -172,3 +172,49 @@ stub actually reports.
 - **Whether the cover is always the one square image.** The supplied brief has
   exactly one 1:1 asset, so "pick the square one" works here. A brief with two
   would need a rule for which one wins.
+
+## What the build confirmed
+
+Nothing in the design above needed revising once I wrote it. What the build
+settled:
+
+- **The cost estimate was exact.** Measured over 1000 assemblies per channel:
+  41 credits per tiktok package, 15 per meta package. Asset handling is 92.7%
+  of a tiktok run and 80% of a meta one, which is what makes uploading — not
+  payload shape — the thing worth money at volume. The full estimate is in the
+  [README](README.md#cost-estimate).
+- **The `uploads` handoff held.** Attaching `coverImageId` to the object both
+  `prepare` and `buildPayload` already receive meant `assemble.js` needed no
+  change. The entire diff against files that already existed is:
+
+  ```
+  package.json          | 4 ++-
+  src/channels/index.js | 2 ++
+  ```
+
+  a registry import and entry, plus the two npm scripts. Every shared module and
+  all three supplied test files are byte-identical to what I was given.
+- **The cover-ratio trap was real, and cost more than predicted.** The note
+  guessed the provider would not check ratio; running it proved it and priced it:
+
+  ```
+  upload still-16x9 -> {"ok":true,"remoteId":"tt_asset_0im5rgw","creditsConsumed":15}
+  transcodeCover   -> {"ok":false,"error":"cover_must_be_square","creditsConsumed":8}
+  ```
+
+  23 credits to discover a mistake that `selectAssets` catches for nothing. The
+  ratio filter is in `selectAssets` for that reason.
+- **Every failure mode above has a test.** `test/tiktok.channel.test.js` covers
+  all five, including the rejected transcode and the wrong-ratio cover. 30 tests
+  pass — the supplied 19 unchanged, plus 11 new.
+
+One thing here was not in the plan: **`scripts/verify.mjs`** (`npm run verify`).
+The brief asks for a check that proves the existing channel still works and fails
+when the change is reverted; the note never said how that would be built. It
+asserts meta's exact output, tiktok's exact output, and the sha256 of the three
+supplied test files, so "the existing suite passes unchanged" is enforced rather
+than asserted. Reverting the channel makes it exit 1 with `unknown channel:
+tiktok`.
+
+Both open questions above are still open. Neither blocked the build, and both are
+still the answers I would want before this ran for real.
